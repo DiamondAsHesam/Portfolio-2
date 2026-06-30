@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hesam · Full-Stack Portfolio</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* ==============================================
+               RESET & BASE
+               ============================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #0b0b0b;
+            color: #ececec;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection {
+            background: #0099ff;
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0099ff;
+            border-radius: 10px;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ==============================================
+               LOADER
+               ============================================== */
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0b0b0b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #loader.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-ring {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 153, 255, 0.08);
+            border-top-color: #0099ff;
+            animation: spin 0.8s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-text {
+            margin-top: 28px;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ==============================================
+               MAIN WRAP
+               ============================================== */
+        #main {
+            opacity: 0;
+            transition: opacity 0.9s ease;
+        }
+        #main.show {
+            opacity: 1;
+        }
+
+        /* ==============================================
+               SIDEBAR NAV
+               ============================================== */
+        .sidebar {
+            position: fixed;
+            left: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .sidebar .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .sidebar .dot::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            transition: all 0.4s ease;
+        }
+
+        .sidebar .dot.active {
+            background: #0099ff;
+            border-color: #0099ff;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 153, 255, 0.25);
+        }
+
+        .sidebar .dot.active::after {
+            border-color: rgba(0, 153, 255, 0.2);
+        }
+
+        .sidebar .dot:hover {
+            background: rgba(0, 153, 255, 0.4);
+            transform: scale(1.15);
+        }
+
+        .sidebar .dot .label {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.55rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.25);
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar .dot:hover .label {
+            opacity: 1;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ==============================================
+               LANG TOGGLE (floating)
+               ============================================== */
+        .lang-float {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 6px 14px 6px 18px;
+            border-radius: 40px;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lang-float:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(0, 153, 255, 0.2);
+        }
+
+        .lang-float .toggle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lang-float .toggle:hover {
+            background: #0099ff;
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* ==============================================
+               SECTIONS
+               ============================================== */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .section-inner {
+            width: 100%;
+        }
+
+        /* Section label (top-left of each) */
+        .section-label {
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.15);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* ==============================================
+               HERO
+               ============================================== */
+        #hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content .greeting {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 12px;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(3.2rem, 8vw, 7rem);
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .hero-content h1 .highlight {
+            background: linear-gradient(135deg, #0099ff, #66c2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .tagline {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 300;
+            max-width: 440px;
+            margin-bottom: 32px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .hero-stats .stat .num {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .hero-stats .stat .num span {
+            color: #0099ff;
+        }
+
+        .hero-stats .stat .lbl {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.25);
+            margin-top: 2px;
+        }
+
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-visual .orb {
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 153, 255, 0.12), rgba(0, 153, 255, 0.02));
+            border: 1px solid rgba(0, 153, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-visual .orb .inner {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, rgba(0, 153, 255, 0.15), transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.05);
+            letter-spacing: 4px;
+            position: relative;
+        }
+
+        .orb-ring {
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 153, 255, 0.04);
+            animation: orbPulse 4s ease-in-out infinite;
+        }
+
+        .orb-ring:nth-child(2) {
+            inset: -40px;
+            animation-delay: 1.5s;
+            border-color: rgba(0, 153, 255, 0.02);
+        }
+
+        @keyframes orbPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        .hero-badge-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .hero-badge-row span {
+            padding: 4px 16px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.6rem;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* ==============================================
+               ABOUT
+               ============================================== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .about-text p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .about-text .pill {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 22px;
+            border-radius: 40px;
+            background: rgba(0, 153, 255, 0.08);
+            border: 1px solid rgba(0, 153, 255, 0.08);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            color: #0099ff;
+        }
+
+        .about-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .about-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            padding: 24px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .about-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(0, 153, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .about-card .icon {
+            font-size: 1.4rem;
+            color: #0099ff;
+            margin-bottom: 12px;
+        }
+
+        .about-card .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .about-card .value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 4px;
+        }
+
+        /* ==============================================
+               SKILLS
+               ============================================== */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .skill-group {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 24px;
+            padding: 28px 24px;
+            transition: all 0.3s ease;
+        }
+
+        .skill-group:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(0, 153, 255, 0.08);
+        }
+
+        .skill-group .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .skill-group .header i {
+            font-size: 1.4rem;
+            color: #0099ff;
+        }
+
+        .skill-group .header h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .skill-item {
+            margin-bottom: 16px;
+        }
+        .skill-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .skill-item .row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 4px;
+        }
+
+        .skill-item .row .name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .skill-item .row .name i {
+            font-size: 0.7rem;
+            color: rgba(0, 153, 255, 0.3);
+        }
+
+        .skill-item .bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .skill-item .bar .fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #0099ff, #66c2ff);
+            border-radius: 10px;
+            transition: width 1.2s cubic-bezier(0.22, 0.97, 0.36, 1);
+        }
+
+        /* ==============================================
+               INTERESTS (horizontal scroll)
+               ============================================== */
+        .interests-scroll {
+            margin-top: 50px;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .interests-scroll .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .interests-track {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0 20px;
+            scrollbar-width: none;
+        }
+
+        .interests-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        .interests-track .chip {
+            flex-shrink: 0;
+            padding: 8px 22px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.45);
+            transition: all 0.3s ease;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .interests-track .chip i {
+            margin-right: 8px;
+            color: rgba(0, 153, 255, 0.3);
+        }
+
+        .interests-track .chip:hover {
+            background: rgba(0, 153, 255, 0.05);
+            border-color: rgba(0, 153, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* ==============================================
+               PROJECTS
+               ============================================== */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 100%, rgba(0, 153, 255, 0.03), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 153, 255, 0.08);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card .icon {
+            font-size: 2.4rem;
+            margin-bottom: 16px;
+        }
+
+        .project-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 6px;
+        }
+
+        .project-card p {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .project-card .badge {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 2px 14px;
+            border-radius: 40px;
+            background: rgba(0, 153, 255, 0.06);
+            font-size: 0.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(0, 153, 255, 0.4);
+        }
+
+        /* ==============================================
+               FAQ
+               ============================================== */
+        .faq-list {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 20px 0;
+            cursor: pointer;
+        }
+
+        .faq-item .q {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.3s ease;
+        }
+
+        .faq-item .q i {
+            color: rgba(0, 153, 255, 0.2);
+            transition: transform 0.4s ease;
+            font-size: 0.8rem;
+        }
+
+        .faq-item.active .q {
+            color: #fff;
+        }
+
+        .faq-item.active .q i {
+            transform: rotate(180deg);
+            color: #0099ff;
+        }
+
+        .faq-item .a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1), padding 0.4s ease;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .faq-item.active .a {
+            max-height: 200px;
+            padding-top: 16px;
+        }
+
+        /* ==============================================
+               CONTACT
+               ============================================== */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .contact-info .big {
+            font-size: 2.6rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.1;
+        }
+
+        .contact-info .big span {
+            color: #0099ff;
+        }
+
+        .contact-info p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.95rem;
+            max-width: 380px;
+            margin-bottom: 30px;
+        }
+
+        .contact-info .detail {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.85rem;
+        }
+
+        .contact-info .detail i {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0, 153, 255, 0.04);
+            border: 1px solid rgba(0, 153, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0099ff;
+            font-size: 0.8rem;
+        }
+
+        .contact-socials {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .contact-socials a {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .contact-socials a:hover {
+            background: #0099ff;
+            border-color: #0099ff;
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 153, 255, 0.15);
+        }
+
+        .contact-form {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 24px;
+            padding: 32px 28px;
+        }
+
+        .contact-form .field {
+            margin-bottom: 20px;
+        }
+
+        .contact-form label {
+            display: block;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.15);
+            margin-bottom: 6px;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            border-color: rgba(0, 153, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .contact-form button {
+            padding: 12px 36px;
+            border: none;
+            border-radius: 40px;
+            background: #0099ff;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .contact-form button:hover {
+            background: #0088e6;
+            transform: scale(1.02);
+            box-shadow: 0 8px 28px rgba(0, 153, 255, 0.2);
+        }
+
+        /* ==============================================
+               FOOTER
+               ============================================== */
+        .footer {
+            padding: 60px 0 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            margin-top: 20px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .footer-col .brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .footer-col .brand span {
+            color: #0099ff;
+        }
+
+        .footer-col p {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.85rem;
+            max-width: 280px;
+        }
+
+        .footer-col h5 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.15);
+            margin-bottom: 16px;
+        }
+
+        .footer-col a {
+            display: block;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-col a:hover {
+            color: #0099ff;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.08);
+            letter-spacing: 0.5px;
+        }
+
+        .footer-bottom span {
+            color: rgba(0, 153, 255, 0.2);
+        }
+
+        /* ==============================================
+               RESPONSIVE
+               ============================================== */
+        @media (max-width: 1024px) {
+            .sidebar {
+                display: none;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+
+            .hero-content .tagline {
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .hero-badge-row {
+                justify-content: center;
+            }
+
+            .hero-visual .orb {
+                width: 240px;
+                height: 240px;
+            }
+
+            .hero-visual .orb .inner {
+                width: 140px;
+                height: 140px;
+                font-size: 2.8rem;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .lang-float {
+                top: 16px;
+                right: 16px;
+                padding: 4px 12px 4px 14px;
+                font-size: 0.5rem;
+            }
+
+            .lang-float .toggle {
+                width: 24px;
+                height: 24px;
+                font-size: 0.65rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2.8rem;
+            }
+
+            .hero-stats {
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+
+            .hero-stats .stat .num {
+                font-size: 1.2rem;
+            }
+
+            .hero-visual .orb {
+                width: 180px;
+                height: 180px;
+            }
+
+            .hero-visual .orb .inner {
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
+            }
+
+            .orb-ring {
+                display: none;
+            }
+
+            .about-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .footer-col p {
+                max-width: 100%;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .section-label {
+                margin-bottom: 24px;
+            }
+
+            .contact-form {
+                padding: 24px 18px;
+            }
+
+            .contact-info .big {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-content h1 {
+                font-size: 2.4rem;
+            }
+
+            .hero-stats .stat .num {
+                font-size: 1rem;
+            }
+
+            .contact-info .big {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LOADER ===== -->
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">Loading experience</div>
+    </div>
+
+    <!-- ===== MAIN ===== -->
+    <div id="main">
+
+        <!-- Sidebar Nav -->
+        <nav class="sidebar" id="sidebar">
+            <div class="dot active" data-section="hero"><span class="label">Home</span></div>
+            <div class="dot" data-section="about"><span class="label">About</span></div>
+            <div class="dot" data-section="skills"><span class="label">Skills</span></div>
+            <div class="dot" data-section="projects"><span class="label">Projects</span></div>
+            <div class="dot" data-section="faq"><span class="label">FAQ</span></div>
+            <div class="dot" data-section="contact"><span class="label">Contact</span></div>
+        </nav>
+
+        <!-- Lang Toggle -->
+        <div class="lang-float" id="langToggle">
+            <span id="langLabel">EN</span>
+            <button class="toggle" aria-label="Toggle language"><i class="fas fa-globe"></i></button>
+        </div>
+
+        <!-- ============================================
+        HERO
+        ============================================ -->
+        <section class="section" id="hero">
+            <div class="container section-inner">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <div class="greeting" id="heroGreeting">✦ Digital Alchemist</div>
+                        <h1>
+                            I'm <span class="highlight" id="heroName">Hesam</span>
+                        </h1>
+                        <p class="tagline" id="heroTagline">I don't write code — I orchestrate AI to build it for me.</p>
+                        <div class="hero-stats">
+                            <div class="stat">
+                                <div class="num"><span id="statExp">11</span>+</div>
+                                <div class="lbl" id="statExpLabel">Years Experience</div>
+                            </div>
+                            <div class="stat">
+                                <div class="num" id="statAge">17</div>
+                                <div class="lbl" id="statAgeLabel">Age</div>
+                            </div>
+                            <div class="stat">
+                                <div class="num">∞</div>
+                                <div class="lbl" id="statCuriosity">Curiosity</div>
+                            </div>
+                        </div>
+                        <div class="hero-badge-row">
+                            <span>⚡ AI Orchestrator</span>
+                            <span>🎮 Gamer</span>
+                            <span>📈 Crypto</span>
+                            <span>🎨 Designer</span>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="orb">
+                            <div class="orb-ring"></div>
+                            <div class="orb-ring"></div>
+                            <div class="inner">H</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        ABOUT
+        ============================================ -->
+        <section class="section" id="about">
+            <div class="container section-inner">
+                <div class="section-label" id="aboutLabel">✦ About</div>
+                <div class="about-grid">
+                    <div class="about-text">
+                        <p id="aboutP1">I'm Hesam — born in Gorgan, Iran, and raised on computers. I've been navigating the digital world since I was 8, and I never looked back.</p>
+                        <p id="aboutP2">I don't just use tech; I bend it. From gaming and crypto to AI orchestration and content creation, I treat every tool as a medium for expression.</p>
+                        <p id="aboutP3">I've worked with AI to build projects, learned by doing, and I'm always hungry for the next challenge.</p>
+                        <span class="pill" id="aboutPill">✦ Open for collaboration ✦</span>
+                    </div>
+                    <div class="about-cards">
+                        <div class="about-card">
+                            <div class="icon"><i class="fas fa-location-dot"></i></div>
+                            <div class="label" id="aboutCard1Label">Location</div>
+                            <div class="value" id="aboutCard1Value">Gorgan, Iran</div>
+                        </div>
+                        <div class="about-card">
+                            <div class="icon"><i class="fas fa-calendar"></i></div>
+                            <div class="label" id="aboutCard2Label">Born</div>
+                            <div class="value" id="aboutCard2Value">July 19, 2007</div>
+                        </div>
+                        <div class="about-card">
+                            <div class="icon"><i class="fas fa-brain"></i></div>
+                            <div class="label" id="aboutCard3Label">Mindset</div>
+                            <div class="value" id="aboutCard3Value">Builder + Learner</div>
+                        </div>
+                        <div class="about-card">
+                            <div class="icon"><i class="fas fa-flag"></i></div>
+                            <div class="label" id="aboutCard4Label">Heritage</div>
+                            <div class="value" id="aboutCard4Value">Persian · Golestan</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        SKILLS
+        ============================================ -->
+        <section class="section" id="skills">
+            <div class="container section-inner">
+                <div class="section-label" id="skillsLabel">✦ Expertise</div>
+
+                <div class="skills-grid" id="skillsGrid"></div>
+
+                <div class="interests-scroll">
+                    <div class="label" id="interestsLabel">✦ Interests &amp; Hobbies</div>
+                    <div class="interests-track" id="interestsTrack"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        PROJECTS
+        ============================================ -->
+        <section class="section" id="projects">
+            <div class="container section-inner">
+                <div class="section-label" id="projectsLabel">✦ Projects</div>
+                <div class="projects-grid" id="projectsGrid"></div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        FAQ
+        ============================================ -->
+        <section class="section" id="faq">
+            <div class="container section-inner">
+                <div class="section-label" id="faqLabel">✦ FAQ</div>
+                <div class="faq-list" id="faqList"></div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        CONTACT
+        ============================================ -->
+        <section class="section" id="contact">
+            <div class="container section-inner">
+                <div class="section-label" id="contactLabel">✦ Connect</div>
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <div class="big" id="contactBig">Let's <span>talk</span></div>
+                        <p id="contactDesc">Got a project, an idea, or just want to say hi? I'm always open to connecting.</p>
+                        <div class="detail">
+                            <i class="fas fa-phone"></i>
+                            <span id="contactPhone">+98 911 410 4923</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-envelope"></i>
+                            <span id="contactEmail">madpro01034@gmail.com</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-location-dot"></i>
+                            <span id="contactLocation">Gorgan, Iran</span>
+                        </div>
+                        <div class="contact-socials" id="contactSocials"></div>
+                    </div>
+                    <div class="contact-form">
+                        <div class="field">
+                            <label id="formNameLabel">Your Name</label>
+                            <input type="text" id="formName" placeholder="e.g. Alex" />
+                        </div>
+                        <div class="field">
+                            <label id="formEmailLabel">Email</label>
+                            <input type="email" id="formEmail" placeholder="alex@example.com" />
+                        </div>
+                        <div class="field">
+                            <label id="formMsgLabel">Message</label>
+                            <textarea id="formMsg" placeholder="Tell me about your project..."></textarea>
+                        </div>
+                        <button id="formSubmit">Send Message</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        FOOTER
+        ============================================ -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col">
+                        <div class="brand"><span>H</span>esam</div>
+                        <p id="footerTagline">Front-end developer &amp; AI orchestrator — building the future, one prompt at a time.</p>
+                    </div>
+                    <div class="footer-col">
+                        <h5 id="footerQuickLabel">Quick</h5>
+                        <a href="#hero">Home</a>
+                        <a href="#about">About</a>
+                        <a href="#skills">Skills</a>
+                        <a href="#projects">Projects</a>
+                        <a href="#faq">FAQ</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                    <div class="footer-col">
+                        <h5 id="footerReachLabel">Reach</h5>
+                        <a href="mailto:madpro01034@gmail.com">madpro01034@gmail.com</a>
+                        <a href="tel:+989114104923">+98 911 410 4923</a>
+                        <a href="#">Gorgan, Iran</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    &copy; 2025 <span>Hesam</span> · Built with curiosity &amp; caffeine
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ============================================
+    SCRIPT
+    ============================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ─── DATA ────────────────────────────────────────────────
+            const DATA = {
+                en: {
+                    hero: { greeting: '✦ Digital Alchemist', name: 'Hesam',
+                    tagline: "I don't write code — I orchestrate AI to build it for me." },
+                    about: {
+                        p1: "I'm Hesam — born in Gorgan, Iran, and raised on computers. I've been navigating the digital world since I was 8, and I never looked back.",
+                        p2: "I don't just use tech; I bend it. From gaming and crypto to AI orchestration and content creation, I treat every tool as a medium for expression.",
+                        p3: "I've worked with AI to build projects, learned by doing, and I'm always hungry for the next challenge.",
+                        pill: '✦ Open for collaboration ✦',
+                        cards: ['Location', 'Born', 'Mindset', 'Heritage'],
+                        values: ['Gorgan, Iran', 'July 19, 2007', 'Builder + Learner', 'Persian · Golestan']
+                    },
+                    skills: {
+                        label: '✦ Expertise',
+                        groups: [{
+                            title: 'Core',
+                            icon: 'fa-rocket',
+                            items: [
+                                { name: 'AI Orchestration', icon: 'fa-brain', pct: 85 },
+                                { name: 'Problem Solving', icon: 'fa-lightbulb', pct: 80 },
+                                { name: 'Adaptability', icon: 'fa-arrows-spin', pct: 90 },
+                            ]
+                        }, {
+                            title: 'Tools',
+                            icon: 'fa-tools',
+                            items: [
+                                { name: 'ChatGPT / Claude', icon: 'fa-robot', pct: 88 },
+                                { name: 'Git & GitHub', icon: 'fa-code-branch', pct: 55 },
+                                { name: 'Figma / Design', icon: 'fa-pen-ruler', pct: 45 },
+                            ]
+                        }, {
+                            title: 'Domains',
+                            icon: 'fa-globe',
+                            items: [
+                                { name: 'Crypto & Markets', icon: 'fa-coins', pct: 60 },
+                                { name: 'Social Media', icon: 'fa-share-nodes', pct: 85 },
+                                { name: 'Gaming', icon: 'fa-gamepad', pct: 90 },
+                            ]
+                        }],
+                        interests: ['Computer', 'Gaming', 'AI', 'Crypto', 'Design', 'Editing', 'English', 'Marketing']
+                    },
+                    projects: {
+                        label: '✦ Projects',
+                        items: [
+                            { icon: '⚙️', title: 'AI Toolchain', desc: 'Orchestrating AI agents for automation',
+                            badge: 'In Progress' },
+                            { icon: '⛩️', title: 'Persian UI', desc: 'A modern design system with Persian flavor',
+                                badge: 'Concept' },
+                            { icon: '🐲', title: 'Crypto Dashboard', desc: 'Real-time market tracker with AI insights',
+                                badge: 'Coming Soon' },
+                            { icon: '🎮', title: 'Game Mods', desc: 'Custom mods and tweaks for my favorite titles',
+                                badge: 'Hobby' },
+                        ]
+                    },
+                    faq: {
+                        label: '✦ FAQ',
+                        items: [
+                            { q: 'How do you "orchestrate" AI?',
+                                a: 'I use tools like ChatGPT and Claude. I write precise prompts, test outputs, refine, and integrate — like conducting an orchestra of models.' },
+                            { q: 'What’s your background?',
+                                a: 'I started with computers at 8, fell into gaming, then crypto, design, and AI. Self-taught, always learning.' },
+                            { q: 'Do you collaborate?',
+                                a: 'Absolutely. If you have a project that needs a creative digital mind, let’s talk.' },
+                            { q: 'What’s your favorite tech?',
+                                a: 'AI, no doubt. It’s the most exciting tool I’ve ever worked with.' },
+                            { q: 'How can I reach you?',
+                                a: 'Drop me a message here or hit me up on socials — I reply fastest on Telegram and Discord.' }
+                        ]
+                    },
+                    contact: {
+                        label: '✦ Connect',
+                        big: "Let's <span>talk</span>",
+                        desc: "Got a project, an idea, or just want to say hi? I'm always open to connecting.",
+                        phone: '+98 911 410 4923',
+                        email: 'madpro01034@gmail.com',
+                        location: 'Gorgan, Iran',
+                        socials: [
+                            { platform: 'Instagram', icon: 'fab fa-instagram',
+                            url: 'https://www.instagram.com/knownashesam' },
+                            { platform: 'Twitter', icon: 'fab fa-twitter', url: 'https://X.com/KnownAsHesam' },
+                            { platform: 'GitHub', icon: 'fab fa-github', url: 'https://Github.com/DiamondAsHesam' },
+                            { platform: 'LinkedIn', icon: 'fab fa-linkedin',
+                                url: 'https://www.linkedin.com/in/known-ashesam-399039413' },
+                            { platform: 'Telegram', icon: 'fab fa-telegram', url: 'https://t.me/DiamondAsHesam' },
+                            { platform: 'Discord', icon: 'fab fa-discord', url: 'https://discord.gg/MWr2QCCMTv' },
+                        ]
+                    },
+                    footer: { tagline: 'Front-end developer & AI orchestrator — building the future, one prompt at a time.' }
+                },
+                fa: {
+                    hero: { greeting: '✦ کیمیاگر دیجیتال', name: 'حسام',
+                    tagline: 'کد نمی‌نویسم — به هوش مصنوعی دستور می‌دم برام بسازه.' },
+                    about: {
+                        p1: 'من حسام هستم — متولد گرگان، ایران، و از بچگی با کامپیوتر بزرگ شدم. از ۸ سالگی وارد دنیای دیجیتال شدم و هیچ‌وقت به عقب نگاه نکردم.',
+                        p2: 'من فقط از تکنولوژی استفاده نمی‌کنم؛ بهش فرمان می‌دم. از بازی و ارز دیجیتال تا هوش مصنوعی و تولید محتوا، هر ابزاری رو به عنوان رسانه‌ای برای بیان می‌بینم.',
+                        p3: 'با هوش مصنوعی پروژه ساختم، با انجام دادن یاد گرفتم، و همیشه برای چالش بعدی آماده‌ام.',
+                        pill: '✦ آماده همکاری ✦',
+                        cards: ['مکان', 'تولد', 'ذهنیت', 'ریشه'],
+                        values: ['ایران، گرگان', '۱۳۸۶/۰۴/۲۸', 'سازنده + یادگیرنده', 'پارسی · گلستان']
+                    },
+                    skills: {
+                        label: '✦ تخصص‌ها',
+                        groups: [{
+                            title: 'هسته',
+                            icon: 'fa-rocket',
+                            items: [
+                                { name: 'فرماندهی هوش مصنوعی', icon: 'fa-brain', pct: 85 },
+                                { name: 'حل مسئله', icon: 'fa-lightbulb', pct: 80 },
+                                { name: 'انطباق‌پذیری', icon: 'fa-arrows-spin', pct: 90 },
+                            ]
+                        }, {
+                            title: 'ابزارها',
+                            icon: 'fa-tools',
+                            items: [
+                                { name: 'چت‌جی‌پی‌تی / کلود', icon: 'fa-robot', pct: 88 },
+                                { name: 'گیت و گیت‌هاب', icon: 'fa-code-branch', pct: 55 },
+                                { name: 'فیگما / طراحی', icon: 'fa-pen-ruler', pct: 45 },
+                            ]
+                        }, {
+                            title: 'حوزه‌ها',
+                            icon: 'fa-globe',
+                            items: [
+                                { name: 'کریپتو و بازارها', icon: 'fa-coins', pct: 60 },
+                                { name: 'شبکه‌های اجتماعی', icon: 'fa-share-nodes', pct: 85 },
+                                { name: 'بازی', icon: 'fa-gamepad', pct: 90 },
+                            ]
+                        }],
+                        interests: ['کامپیوتر', 'بازی', 'هوش مصنوعی', 'ارز دیجیتال', 'طراحی', 'تدوین', 'انگلیسی', 'بازاریابی']
+                    },
+                    projects: {
+                        label: '✦ پروژه‌ها',
+                        items: [
+                            { icon: '⚙️', title: 'زنجیره ابزار هوش مصنوعی', desc: 'فرماندهی عوامل هوش مصنوعی برای اتوماسیون',
+                                badge: 'در حال انجام' },
+                            { icon: '⛩️', title: 'یوآی پارسی', desc: 'سیستم طراحی مدرن با طعم پارسی', badge: 'ایده' },
+                            { icon: '🐲', title: 'داشبورد کریپتو', desc: 'پیگیری لحظه‌ای بازار با بینش هوش مصنوعی',
+                                badge: 'به زودی' },
+                            { icon: '🎮', title: 'مدهای بازی', desc: 'مد و تغییرات سفارشی برای بازی‌های مورد علاقه',
+                            badge: 'سرگرمی' },
+                        ]
+                    },
+                    faq: {
+                        label: '✦ سوالات متداول',
+                        items: [
+                            { q: 'چطور به هوش مصنوعی "فرمان" می‌دی؟',
+                                a: 'از ابزارهایی مثل چت‌جی‌پی‌تی و کلود استفاده می‌کنم. پرامپت دقیق می‌نویسم، خروجی رو تست می‌کنم، اصلاح و یکپارچه می‌کنم — مثل رهبری یک ارکستر از مدل‌ها.' },
+                            { q: 'پیشینه‌ات چیه؟',
+                                a: 'از ۸ سالگی با کامپیوتر شروع کردم، بعد بازی، بعد کریپتو، طراحی و هوش مصنوعی. خودآموخته و همیشه در حال یادگیری.' },
+                            { q: 'همکاری قبول می‌کنی؟',
+                                a: 'حتماً. اگه پروژه‌ای داری که به ذهن خلاق دیجیتال نیاز داره، باهم حرف بزنیم.' },
+                            { q: 'تکنولوژی مورد علاقه‌ات چیه؟',
+                                a: 'هوش مصنوعی، بدون شک. هیجان‌انگیزترین ابزاری که تا حالا باهاش کار کردم.' },
+                            { q: 'چطور می‌تونم باهات تماس بگیرم؟',
+                                a: 'اینجا بهم پیام بده یا توی شبکه‌های اجتماعی — توی تلگرام و دیسکورد سریع‌ترین جواب رو می‌دم.' }
+                        ]
+                    },
+                    contact: {
+                        label: '✦ ارتباط',
+                        big: "بیا <span>حرف بزنیم</span>",
+                        desc: 'پروژه‌ای، ایده‌ای، یا فقط می‌خوای سلام کنی؟ همیشه برای ارتباط بازم.',
+                        phone: '۰۹۱۱ ۴۱۰ ۴۹۲۳',
+                        email: 'madpro01034@gmail.com',
+                        location: 'ایران، گرگان',
+                        socials: [
+                            { platform: 'اینستاگرام', icon: 'fab fa-instagram',
+                            url: 'https://www.instagram.com/knownashesam' },
+                            { platform: 'توییتر', icon: 'fab fa-twitter', url: 'https://X.com/KnownAsHesam' },
+                            { platform: 'گیت‌هاب', icon: 'fab fa-github', url: 'https://Github.com/DiamondAsHesam' },
+                            { platform: 'لینکدین', icon: 'fab fa-linkedin',
+                                url: 'https://www.linkedin.com/in/known-ashesam-399039413' },
+                            { platform: 'تلگرام', icon: 'fab fa-telegram', url: 'https://t.me/DiamondAsHesam' },
+                            { platform: 'دیسکورد', icon: 'fab fa-discord', url: 'https://discord.gg/MWr2QCCMTv' },
+                        ]
+                    },
+                    footer: { tagline: 'توسعه‌دهنده فرانت‌اند و فرمانده هوش مصنوعی — ساختن آینده، یک پرامپت در هر بار.' }
+                }
+            };
+
+            // ─── STATE ────────────────────────────────────────────────
+            let currentLang = 'en';
+            let isChanging = false;
+
+            // ─── DOM REFS ──────────────────────────────────────────────
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
+
+            const mainEl = $('#main');
+            const loaderEl = $('#loader');
+            const langLabel = $('#langLabel');
+            const langBtn = $('#langToggle');
+
+            // ─── RENDER ────────────────────────────────────────────────
+            function render(lang) {
+                const d = DATA[lang];
+                if (!d) return;
+
+                // Hero
+                $('#heroGreeting').textContent = d.hero.greeting;
+                $('#heroName').textContent = d.hero.name;
+                $('#heroTagline').textContent = d.hero.tagline;
+
+                // About
+                $('#aboutP1').textContent = d.about.p1;
+                $('#aboutP2').textContent = d.about.p2;
+                $('#aboutP3').textContent = d.about.p3;
+                $('#aboutPill').textContent = d.about.pill;
+
+                const cardLabels = ['#aboutCard1Label', '#aboutCard2Label', '#aboutCard3Label', '#aboutCard4Label'];
+                const cardValues = ['#aboutCard1Value', '#aboutCard2Value', '#aboutCard3Value', '#aboutCard4Value'];
+                d.about.cards.forEach((label, i) => {
+                    if (cardLabels[i]) $(cardLabels[i]).textContent = label;
+                    if (cardValues[i]) $(cardValues[i]).textContent = d.about.values[i];
+                });
+
+                // Skills
+                $('#skillsLabel').textContent = d.skills.label;
+                const grid = $('#skillsGrid');
+                grid.innerHTML = '';
+                d.skills.groups.forEach(g => {
+                    const div = document.createElement('div');
+                    div.className = 'skill-group';
+                    let itemsHTML = '';
+                    g.items.forEach(item => {
+                        itemsHTML += `
+                            <div class="skill-item">
+                                <div class="row">
+                                    <span class="name"><i class="${item.icon}"></i> ${item.name}</span>
+                                    <span>${item.pct}%</span>
+                                </div>
+                                <div class="bar"><div class="fill" data-pct="${item.pct}"></div></div>
+                            </div>
+                        `;
+                    });
+                    div.innerHTML = `
+                        <div class="header"><i class="fas ${g.icon}"></i><h4>${g.title}</h4></div>
+                        ${itemsHTML}
+                    `;
+                    grid.appendChild(div);
+                });
+
+                // Interests
+                const track = $('#interestsTrack');
+                track.innerHTML = '';
+                const icons = ['fa-desktop', 'fa-gamepad', 'fa-brain', 'fa-coins', 'fa-pen-ruler', 'fa-pen-fancy',
+                    'fa-language', 'fa-chart-line'
+                ];
+                d.skills.interests.forEach((item, i) => {
+                    const chip = document.createElement('span');
+                    chip.className = 'chip';
+                    chip.innerHTML = `<i class="fas ${icons[i % icons.length]}"></i> ${item}`;
+                    track.appendChild(chip);
+                });
+
+                // Projects
+                $('#projectsLabel').textContent = d.projects.label;
+                const pGrid = $('#projectsGrid');
+                pGrid.innerHTML = '';
+                d.projects.items.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    card.innerHTML = `
+                        <div class="icon">${p.icon}</div>
+                        <h4>${p.title}</h4>
+                        <p>${p.desc}</p>
+                        <span class="badge">${p.badge}</span>
+                    `;
+                    pGrid.appendChild(card);
+                });
+
+                // FAQ
+                $('#faqLabel').textContent = d.faq.label;
+                const fList = $('#faqList');
+                fList.innerHTML = '';
+                d.faq.items.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'faq-item';
+                    if (idx === 0) div.classList.add('active');
+                    div.innerHTML = `
+                        <div class="q"><span>${item.q}</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="a">${item.a}</div>
+                    `;
+                    fList.appendChild(div);
+                });
+
+                // FAQ clicks
+                $$('.faq-item').forEach(el => {
+                    const q = el.querySelector('.q');
+                    if (q) {
+                        q.addEventListener('click', function() {
+                            const parent = this.parentElement;
+                            const isActive = parent.classList.contains('active');
+                            $$('.faq-item').forEach(i => i.classList.remove('active'));
+                            if (!isActive) parent.classList.add('active');
+                        });
+                    }
+                });
+
+                // Contact
+                $('#contactLabel').textContent = d.contact.label;
+                $('#contactBig').innerHTML = d.contact.big;
+                $('#contactDesc').textContent = d.contact.desc;
+                $('#contactPhone').textContent = d.contact.phone;
+                $('#contactEmail').textContent = d.contact.email;
+                $('#contactLocation').textContent = d.contact.location;
+
+                const socials = $('#contactSocials');
+                socials.innerHTML = '';
+                d.contact.socials.forEach(s => {
+                    const a = document.createElement('a');
+                    a.href = s.url;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    a.setAttribute('aria-label', s.platform);
+                    a.innerHTML = `<i class="${s.icon}"></i>`;
+                    socials.appendChild(a);
+                });
+
+                // Footer
+                $('#footerTagline').textContent = d.footer.tagline;
+
+                // Lang label
+                langLabel.textContent = lang === 'en' ? 'EN' : 'FA';
+
+                // Form labels
+                const formLabels = {
+                    en: { name: 'Your Name', email: 'Email', msg: 'Message', submit: 'Send Message' },
+                    fa: { name: 'نام شما', email: 'ایمیل', msg: 'پیام', submit: 'ارسال پیام' }
+                };
+                const fl = formLabels[lang];
+                if (fl) {
+                    $('#formNameLabel').textContent = fl.name;
+                    $('#formEmailLabel').textContent = fl.email;
+                    $('#formMsgLabel').textContent = fl.msg;
+                    $('#formSubmit').textContent = fl.submit;
+                }
+
+                // Quick footer labels
+                const ql = lang === 'en' ? { quick: 'Quick', reach: 'Reach' } : { quick: 'سریع', reach: 'ارتباط' };
+                $('#footerQuickLabel').textContent = ql.quick;
+                $('#footerReachLabel').textContent = ql.reach;
+
+                // Animate bars after render
+                setTimeout(() => {
+                    $$('.fill[data-pct]').forEach(el => {
+                        const pct = parseInt(el.getAttribute('data-pct'));
+                        el.style.width = pct + '%';
+                    });
+                }, 400);
+            }
+
+            // ─── LANGUAGE SWITCH ──────────────────────────────────────
+            function switchLang(lang) {
+                if (isChanging || lang === currentLang) return;
+                isChanging = true;
+
+                loaderEl.classList.remove('hide');
+                loaderEl.style.display = 'flex';
+                mainEl.classList.remove('show');
+
+                setTimeout(() => {
+                    currentLang = lang;
+                    render(lang);
+                    loaderEl.classList.add('hide');
+                    mainEl.classList.add('show');
+                    setTimeout(() => {
+                        loaderEl.style.display = 'none';
+                        isChanging = false;
+                    }, 500);
+                }, 1200);
+            }
+
+            langBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const next = currentLang === 'en' ? 'fa' : 'en';
+                switchLang(next);
+            });
+
+            // ─── SIDEBAR NAV ──────────────────────────────────────────
+            const dots = $$('.sidebar .dot');
+            const sections = ['hero', 'about', 'skills', 'projects', 'faq', 'contact'];
+
+            dots.forEach((dot, i) => {
+                dot.addEventListener('click', () => {
+                    const target = document.getElementById(sections[i]);
+                    if (target) target.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            // Update active dot on scroll
+            const sectionIds = sections.map(id => document.getElementById(id));
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        dots.forEach(d => d.classList.remove('active'));
+                        const idx = sections.indexOf(id);
+                        if (idx >= 0) dots[idx].classList.add('active');
+                    }
+                });
+            }, { threshold: 0.4 });
+
+            sectionIds.forEach(el => {
+                if (el) observer.observe(el);
+            });
+
+            // ─── GSAP ANIMATIONS ──────────────────────────────────────
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Fade in sections
+            $$('.section').forEach((section, i) => {
+                if (i === 0) return;
+                gsap.from(section, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse',
+                    },
+                    opacity: 0,
+                    y: 40,
+                    duration: 0.8,
+                    ease: 'power2.out',
+                });
+            });
+
+            // Hero orb pulse
+            gsap.to('.orb-ring', {
+                scale: 1.08,
+                opacity: 0.3,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut',
+                stagger: 0.6,
+            });
+
+            // ─── LOADER ────────────────────────────────────────────────
+            setTimeout(() => {
+                loaderEl.classList.add('hide');
+                mainEl.classList.add('show');
+                setTimeout(() => {
+                    loaderEl.style.display = 'none';
+                }, 600);
+            }, 1500);
+
+            // ─── FORM (demo) ──────────────────────────────────────────
+            $('#formSubmit').addEventListener('click', function(e) {
+                e.preventDefault();
+                const name = $('#formName').value.trim();
+                const email = $('#formEmail').value.trim();
+                const msg = $('#formMsg').value.trim();
+                if (!name || !email || !msg) {
+                    alert(currentLang === 'en' ? 'Please fill in all fields.' : 'لطفاً همه فیلدها را پر کنید.');
+                    return;
+                }
+                alert(currentLang === 'en' ?
+                    `Thanks ${name}! I'll get back to you soon.` :
+                    `ممنون ${name}! به زودی باهات تماس می‌گیرم.`
+                );
+                $('#formName').value = '';
+                $('#formEmail').value = '';
+                $('#formMsg').value = '';
+            });
+
+            // ─── INIT ──────────────────────────────────────────────────
+            render('en');
+
+            // ─── COPY PROTECTION ──────────────────────────────────────
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', e => {
+                if (e.ctrlKey && ['c', 'v', 'x', 'u', 's', 'p', 'a'].includes(e.key)) e.preventDefault();
+                if (e.key === 'F12') e.preventDefault();
+            });
+
+        });
+    </script>
+
+</body>
+</html>
